@@ -22,10 +22,8 @@ console.log(searchTerm);
     // Combine results and rank them
     const combinedResults = [...youtubeResults, ...articleResults];
     const rankedResults = rankResults(combinedResults);
-// console.log(rankResults);
     res.json(rankedResults);
   } catch (error) {
-    console.log(error.response.data)
     res.status(500).json({ message: error.message });
   }
 });
@@ -84,6 +82,7 @@ function rankResults(results) {
   return results.sort((a, b) => {
     // Ranking based on views and likes for YouTube videos
     if (a.type === 'youtube' && b.type === 'youtube') {
+      // First ranked them on basis if views then likes
       return b.views - a.views || b.likes - a.likes;
     }
     return 0;
