@@ -51,8 +51,6 @@ const App = () => {
     // No need to call setResults here since it's handled in handleSearch and handleFilter
   }, [results]);
 
-  console.log(results);
-
   return (
     <div className="app-container">
       <div className='nav'>
