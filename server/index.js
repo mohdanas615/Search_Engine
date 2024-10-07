@@ -25,6 +25,7 @@ console.log(searchTerm);
 // console.log(rankResults);
     res.json(rankedResults);
   } catch (error) {
+    console.log(error.response.data)
     res.status(500).json({ message: error.message });
   }
 });
