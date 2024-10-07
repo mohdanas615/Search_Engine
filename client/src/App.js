@@ -1,14 +1,29 @@
-
 import React, { useEffect, useState } from 'react';
 import './App.css'; // Import the CSS file
+
+const debounce = (func, delay) => {
+  let timeoutId;
+  return (...args) => {
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+    }
+    timeoutId = setTimeout(() => {
+      func(...args);
+    }, delay);
+  };
+};
 
 const App = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [results, setResults] = useState([]);
   const [originalResults, setOriginalResults] = useState([]); // Store original results for filtering
   const [contentType, setContentType] = useState(''); // State for content type
+  const [loading, setLoading] = useState(false); // Loading state
+  const [error, setError] = useState(null); // Error state
 
   const handleSearch = async () => {
+    setLoading(true);
+    setError(null);
     try {
       const response = await fetch('http://localhost:5000/search', {
         method: 'POST',
@@ -27,8 +42,21 @@ const App = () => {
       setOriginalResults(data);
     } catch (error) {
       console.error('Error fetching search results', error);
+      setError('Failed to fetch results. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
+
+  const debouncedSearch = debounce(handleSearch, 300); // 300ms delay
+
+  useEffect(() => {
+    if (searchTerm) {
+      debouncedSearch();
+    } else {
+      setResults(originalResults); // Reset results if search term is empty
+    }
+  }, [searchTerm]); // Search when searchTerm changes
 
   const handleFilter = (event) => {
     const selectedType = event.target.value;
@@ -46,10 +74,6 @@ const App = () => {
 
     setResults(filteredResults);
   };
-
-  useEffect(() => {
-    // No need to call setResults here since it's handled in handleSearch and handleFilter
-  }, [results]);
 
   return (
     <div className="app-container">
@@ -72,6 +96,9 @@ const App = () => {
           </select>
         </div>
       </div>
+      
+      {loading && <p>Loading...</p>}
+      {error && <p className="error">{error}</p>}
       
       <div className="results-container my-4">
         {results.map((result, index) => (
